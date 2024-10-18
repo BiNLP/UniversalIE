@@ -4,121 +4,148 @@ sys.path.append('./')
 import json
 import torch
 from datasets import Dataset
-from transformers import GenerationConfig
 
-from args.parser import get_infer_args
-from model.loader import load_model_and_tokenizer
 from datamodule.preprocess import preprocess_dataset
 from datamodule.preprocess import preprocess_dataset_for_gpt
-from utils.general_utils import get_model_tokenizer_trainer, get_model_name
 from utils.logging import get_logger
 from tqdm import tqdm
 
-if torch.cuda.is_available():
-    device = "cuda"
-else:
-    device = "cpu"
+from typing import List, Optional
+from pydantic import BaseModel, Field, create_model
 
-try:
-    if torch.backends.mps.is_available():
-        device = "mps"
-except: 
-    pass
-
-
-os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
-os.environ["WANDB_DISABLED"] = "true"
+import argparse
+from openai import AzureOpenAI
 
 logger = get_logger(__name__)
 
 
-def convert_datas2datasets(records):
-    dataset_mapping = {'prompt':[], 'query':[], "response":[]}
-    for record in records:
-        dataset_mapping['prompt'].append(record['instruction'])
-        dataset_mapping['query'].append(record.get('input', None))
-        dataset_mapping['response'].append(record.get('output', 'test'))
-    dataset = Dataset.from_dict(dataset_mapping)
-    return dataset
-        
+REGION = "eastus"
+MODEL = "gpt-4o-2024-08-06"
+API_KEY = "02cbec6d675e4827c0c32c6965751cab"
+API_BASE = "https://api.tonggpt.mybigai.ac.cn/proxy"
+ENDPOINT = f"{API_BASE}/{REGION}"
+client = AzureOpenAI( api_key=API_KEY, api_version="2024-08-01-preview", azure_endpoint=ENDPOINT, )
 
-def inference(model_args, data_args, training_args, finetuning_args, generating_args, inference_args):
-    model_class, tokenizer_class, _ = get_model_tokenizer_trainer(model_args.model_name)
-    logger.info(f"model_class:{model_class}\ntokenizer_class:{tokenizer_class}\n")
-    model, tokenizer = load_model_and_tokenizer(
-        model_class,
-        tokenizer_class,
-        model_args,
-        finetuning_args,
-        training_args.do_train,
-        stage="sft",
-    )
-    model.to(device)
-    print(f"BOS:{tokenizer.bos_token_id},{tokenizer.bos_token}\tEOS:{tokenizer.eos_token_id},{tokenizer.eos_token}\tPAD:{tokenizer.pad_token_id},{tokenizer.pad_token}")
+def getFormat(schema_list, task):
+    if task == 'NER':
+        return NERFormat(schema_list)
+    elif task == 'RE':
+        return REFormat(schema_list)
+    elif task == 'EE':
+        return EEFormat(schema_list)
+
+def NERFormat(schema):
+    tmp = {}
+    for field in schema:
+        tmp[field] = (Optional[List[str]], Field(default_factory=list))
+    NEROutputModel = create_model("NEROutputModel",**tmp)
+    return NEROutputModel
+
+
+def REFormat(schema):
+    class RelationItem(BaseModel):
+        subject: str
+        object: str
     
+    REOutputModel = create_model(
+        "REOutputModel",
+        **{relation: (Optional[List[RelationItem]], Field(default_factory=list)) for relation in schema}
+    )
+    return REOutputModel 
 
 
 
 
-    def evaluate(
-        input_ids,
-        generating_args,
-        **kwargs,
-    ):
-        input_length = len(input_ids)
-        input_ids = torch.tensor(input_ids, dtype=torch.long).unsqueeze(0)
-        input_ids = input_ids.to(device)
-        generation_config = GenerationConfig(
-            temperature=generating_args.temperature,
-            top_p=generating_args.top_p,
-            top_k=generating_args.top_k,
-            num_beams=generating_args.num_beams,
-            max_new_tokens=generating_args.max_new_tokens,
-            pad_token_id=tokenizer.pad_token_id,
-            return_dict_in_generate=True,
-            output_scores=True,
-            **kwargs,
+# 根据schema动态生成事件模型
+def EEFormat(schema):
+    '''
+    schema = [
+        {"event_type": "elect", "trigger": True, "arguments": ["place", "entity", "person"]},
+        {"event_type": "start position", "trigger": True, "arguments": ["place", "entity", "person"]},
+        {"event_type": "die", "trigger": True, "arguments": ["place", "agent", "instrument", "victim"]},
+        {"event_type": "extradite", "trigger": True, "arguments": ["agent", "destination", "person"]}
+    ]
+    '''
+
+    # 定义基础事件模型
+    class EventArgument(BaseModel):
+        pass
+
+    # 存储所有事件类型
+    event_fields = {}
+    
+    for event in schema:
+        event_type = event["event_type"]
+        arguments = {arg: (Optional[str], "NAN") for arg in event["arguments"]}
+        
+        # 定义嵌套的Arguments模型
+        ArgumentsModel = create_model(
+            f"{event_type.capitalize()}Arguments",
+            **arguments
         )
+        
+        # 定义事件模型，包括trigger和arguments
+        EventModel = create_model(
+            f"{event_type.capitalize()}Event",
+            trigger=(Optional[str], "NAN"),
+            arguments=(ArgumentsModel, ArgumentsModel())
+        )
+        
+        # 最后将其添加到主模型字段中
+        event_fields[event_type] = (Optional[List[EventModel]], Field(default_factory=list))
+    
+    # 创建最终的输出模型类
+    OutputModel = create_model("OutputModel", **event_fields)
+    return OutputModel
 
-        with torch.no_grad():
-            generation_output = model.generate(
-                input_ids=input_ids,
-                generation_config=generation_config,
-                **kwargs,
-            )
-        generation_output = generation_output.sequences[0]
-        generation_output = generation_output[input_length:]
-        output = tokenizer.decode(generation_output, skip_special_tokens=True)
-        return output
 
 
 
+def getResponse(prompt, text, schema_list, task):
+    completion = client.beta.chat.completions.parse(
+        model="gpt-4o-2024-08-06",
+        messages=[
+            {"role": "system", "content": f"{prompt}" },
+            {"role": "user", "content": f"{text}"},
+        ],
+        response_format= getFormat(schema_list, task),
+    )
+    # import pdb;pdb.set_trace()
+    message = completion.choices[0].message
+    if message.parsed:
+        # print(message.parsed.json())
+        return message.parsed.json()
+    else:
+        print("=============== GPT-4o Parses Failed! ===========")
+        return []
+
+def inference(args):
     records = []
-    with open(inference_args.input_file, "r") as reader:
+    with open(args.input_path, "r") as reader:
         for line in reader:
             data = json.loads(line)
             data["output"] = "test"
             records.append(data)
-    predict_dataset = convert_datas2datasets(records)
-    """ Todo: 从dataset中抽出schema、instrntion、input等"""
-    predict_dataset = preprocess_dataset_for_gpt(predict_dataset)
-
     
-
-    with open(inference_args.output_file, 'w') as writer:
-        for record, model_inputs in zip(records, predict_dataset["input_ids"]):
-            result = evaluate(model_inputs, generating_args)
+    with open(args.output_path, 'w') as writer:
+        for data in tqdm(records):
+            data_dict = eval(data['instruction'])
+            prompt = data_dict['instruction']
+            text = data_dict['input']
+            schema_list = data_dict['schema']
+            result = getResponse(prompt, text, schema_list, args.task)
             print(result)
-            record['output'] = result
-            writer.write(json.dumps(record, ensure_ascii=False)+'\n') 
-
+            data['output'] = result
+            writer.write(json.dumps(data, ensure_ascii=False)+'\n') 
 
 
 def main(args=None):
-    # model_args, data_args, training_args, finetuning_args, generating_args, inference_args = get_infer_args(args)
-    # # model_name映射
-    # model_args.model_name = get_model_name(model_args.model_name)
-    inference(model_args, data_args, training_args, finetuning_args, generating_args, inference_args)
+    parser = argparse.ArgumentParser(description='Please give the argument that GPT-4o need!')
+    parser.add_argument("-i","--input_path", type=str, help="The IEPile format data path.")
+    parser.add_argument("-o","--output_path", type=str, help="The predict result save path.")
+    parser.add_argument("-t","--task", type=str, choices=['NER','RE','EE'], help="NER/RE/EE")
+    args = parser.parse_args()
+    inference(args)
  
 
 
