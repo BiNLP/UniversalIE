@@ -35,11 +35,19 @@ def generate_event_model(schema):
     return OutputModel
 
 # 定义事件schema
+# schema = [
+#     {"event_type": "elect", "trigger": True, "arguments": ["place", "entity", "person"]},
+#     {"event_type": "start position", "trigger": True, "arguments": ["place", "entity", "person"]},
+#     {"event_type": "die", "trigger": True, "arguments": ["place", "agent", "instrument", "victim"]},
+#     {"event_type": "extradite", "trigger": True, "arguments": ["agent", "destination", "person"]}
+# ]
 schema = [
-    {"event_type": "elect", "trigger": True, "arguments": ["place", "entity", "person"]},
-    {"event_type": "start position", "trigger": True, "arguments": ["place", "entity", "person"]},
-    {"event_type": "die", "trigger": True, "arguments": ["place", "agent", "instrument", "victim"]},
-    {"event_type": "extradite", "trigger": True, "arguments": ["agent", "destination", "person"]}
+    {'event_type': 'Transport', 'trigger': True, 'arguments': ['Time-Starting', 'Org', 'Destination']},
+    {'event_type': 'Elect', 'trigger': True, 'arguments': ['Time-Starting', 'Org', 'Destination']},
+    # {'event_type': 'Start-Position', 'trigger': True, 'arguments': ['Time-Starting', 'Org', 'Destination', 'Defendant', 'Price', 'Buyer', 'Prosecutor', 'Place', 'Agent', 'Victim', 'Time-At-Beginning', 'Time-Within', 'Person', 'Instrument', 'Adjudicator', 'Beneficiary', 'Recipient', 'Sentence', 'Artifact', 'Time-Ending', 'Plaintiff', 'Position', 'Giver', 'Entity', 'Crime', 'Attacker', 'Time-After', 'Money', 'Time-Holds', 'Time-Before', 'Origin', 'Vehicle', 'Seller', 'Time-At-End', 'Target']},
+    # {'event_type': 'Nominate', 'trigger': True, 'arguments': ['Time-Starting', 'Org', 'Destination', 'Defendant', 'Price', 'Buyer', 'Prosecutor', 'Place', 'Agent', 'Victim', 'Time-At-Beginning', 'Time-Within', 'Person', 'Instrument', 'Adjudicator', 'Beneficiary', 'Recipient', 'Sentence', 'Artifact', 'Time-Ending', 'Plaintiff', 'Position', 'Giver', 'Entity', 'Crime', 'Attacker', 'Time-After', 'Money', 'Time-Holds', 'Time-Before', 'Origin', 'Vehicle', 'Seller', 'Time-At-End', 'Target']},
+    # {'event_type': 'Attack', 'trigger': True, 'arguments': ['Time-Starting', 'Org', 'Destination', 'Defendant', 'Price', 'Buyer', 'Prosecutor', 'Place', 'Agent', 'Victim', 'Time-At-Beginning', 'Time-Within', 'Person', 'Instrument', 'Adjudicator', 'Beneficiary', 'Recipient', 'Sentence', 'Artifact', 'Time-Ending', 'Plaintiff', 'Position', 'Giver', 'Entity', 'Crime', 'Attacker', 'Time-After', 'Money', 'Time-Holds', 'Time-Before', 'Origin', 'Vehicle', 'Seller', 'Time-At-End', 'Target']},
+    # {'event_type': 'End-Position', 'trigger': True, 'arguments': ['Time-Starting', 'Org', 'Destination', 'Defendant', 'Price', 'Buyer', 'Prosecutor', 'Place', 'Agent', 'Victim', 'Time-At-Beginning', 'Time-Within', 'Person', 'Instrument', 'Adjudicator', 'Beneficiary', 'Recipient', 'Sentence', 'Artifact', 'Time-Ending', 'Plaintiff', 'Position', 'Giver', 'Entity', 'Crime', 'Attacker', 'Time-After', 'Money', 'Time-Holds', 'Time-Before', 'Origin', 'Vehicle', 'Seller', 'Time-At-End', 'Target']}
 ]
 
 # 使用schema生成事件输出模型
@@ -47,19 +55,18 @@ OutputModel = generate_event_model(schema)
 
 # 创建测试数据
 data = {
-    "elect": [
+    "Transport": [
         {
             "trigger": "re - election",
             "arguments": {
-                "place": "NAN",
-                "entity": "NAN",
-                "person": "Putin"
+                "Time-Starting": "NAN",
+                "Org": "NAN",
+                "Destination": "Putin"
             }
         }
     ],
-    "start position": [],
-    "die": [],
-    "extradite": []
+    "Elect": [],
+
 }
 
 # 验证并输出

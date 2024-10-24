@@ -11,13 +11,13 @@ class NERExtracter(Extracter):
         try:      
             rst = json.loads(result)
         except json.decoder.JSONDecodeError:
-            print("json decode error", result)
+            print("json decode error", result)  # 如果Json格式错误在这里就会输出，并返回False和[]
             return False, []
         if type(rst) != dict:
             print("type(rst) != dict", result)
             return False, []
         new_record = []
-        for key, values in rst.items():
+        for key, values in rst.items(): # 'Group', ['Republican', 'Democratic']
             if type(key) != str or type(values) != list:
                 print("type(key) != str or type(values) != list", result)
                 continue
@@ -25,6 +25,6 @@ class NERExtracter(Extracter):
                 if type(iit) != str:
                     print("type(iit) != str", result)
                     continue
-                new_record.append((iit, key))
+                new_record.append((iit, key))   #[('Republican', 'Group'), ('Democratic', 'Group')]
         return True, new_record
 

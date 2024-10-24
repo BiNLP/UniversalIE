@@ -9,6 +9,7 @@ from eval.metric import get_metric
 from eval.extracter import get_extracter
 from convert.utils.constant import NER, RE, EE, EEA, EET, KG, SPO
 
+import re
 
 def convert_kg(outputs, task):
     kgs = []
@@ -40,10 +41,11 @@ def convert_kg(outputs, task):
 
 
 def evaluate(options):
-    extracter_class = get_extracter(options.task)
-    metric_class = get_metric(options.task)
-    
+    extracter_class = get_extracter(options.task)   #<class 'eval.extracter.ee_extracter.EEExtracter'>
+    metric_class = get_metric(options.task) #<class 'eval.metric.ee_metric.EEMetric'>
+
     mapper = defaultdict(dict)
+
     with open(options.path1, 'r') as reader:
         for line in reader:
             data = json.loads(line)
@@ -51,6 +53,7 @@ def evaluate(options):
             if iid in mapper:
                 mapper[iid]['output'].append(data['output'])
             else:
+                # data['instruction'] = re.sub("True","true", data['instruction'])
                 instr = json.loads(data['instruction'])
                 inpt = instr['input']
                 mapper[iid] = {'output':[data['output'], ], 'label':json.loads(data['label']), 'source':data.get('source', 'None'), 'input':inpt}
@@ -67,19 +70,20 @@ def evaluate(options):
 
 
     extracter = extracter_class()
-    for key, value in mapper.items():
+    for key, value in mapper.items():# 'IEPile_format207...', dict_keys(['output', 'label', 'source', 'input'])
+        # 每一个样本
         preds = value['output']
         label = value['label']
 
-        converted_preds = []
-        for it in preds:
-            flag, out_rst = extracter.extract(it)
+        converted_preds = [] #一个样本预测结果
+        for it in preds: # 每一个label list
+            flag, out_rst = extracter.extract(it)   #True/False, [('Republican', 'Group'), ('Democratic', 'Group')]
             if not flag:
                 if options.sort_by:
                     cate_dict[value[options.sort_by]].count_error()
                 total_counter.count_error()
-            converted_preds.extend(out_rst)
-        label_kgs = convert_kg(label, options.task)
+            converted_preds.extend(out_rst) # 和之前的结果拼接 [('Republican', 'Group'), ('Democratic', 'Group'), ('Bob Jones University', 'Educational')]
+        label_kgs = convert_kg(label, options.task) #将标签也转成这种格式
 
         if options.sort_by:
             cate_dict[value[options.sort_by]].count_instance(
@@ -96,7 +100,7 @@ def evaluate(options):
         cate_dict = dict(sorted(cate_dict.items()))
         for key, cate_counter in cate_dict.items():
             cate_results[key] = cate_counter.compute()
-    total_result = total_counter.compute()
+    total_result = total_counter.compute()# 总的结果
 
     all_result = {}
     all_result['total'] = total_result

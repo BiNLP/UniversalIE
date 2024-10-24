@@ -1,4 +1,4 @@
 python src/inference_gpt.py \
-	--input_path "/home/chenzhenbin/Workspaces/UniversalIE/data/ACE2005/IEPile_format/test_ner.json"	\
-	--output_path "/home/chenzhenbin/Workspaces/UniversalIE/results/ACE05_doc/ner_gpt.json"	\
-	--task NER
+	--input_path "/scratch2/nlp/chenzhenbin/Workspaces/datasets/Sentence-IE/EE/ACE05/test.json"	\
+	--output_path "/scratch2/nlp/chenzhenbin/Workspaces/UniversalIE/results/EE/ACE05/gpt.json"	\
+	--task EE
