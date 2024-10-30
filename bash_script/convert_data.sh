@@ -30,9 +30,9 @@
 # EE
 #file="PHEE"
 python ie2instruction/convert_func.py \
-    --src_path /scratch2/nlp/chenzhenbin/Workspaces/IEPile/data/ACE2005/IEPile_format/sample_ee.json \
-    --tgt_path /scratch2/nlp/chenzhenbin/Workspaces/IEPile/data/ACE2005/IEPile_format/test_ee_new.json \
-    --schema_path /scratch2/nlp/chenzhenbin/Workspaces/IEPile/data/ACE2005/IEPile_format/schema_ee_new.json \
+    --src_path /home/chenzhenbin/Workspaces/datasets/dataset_annotated/MUC3/sample_test.json \
+    --tgt_path /home/chenzhenbin/Workspaces/datasets/dataset_annotated/MUC3/test.json \
+    --schema_path /home/chenzhenbin/Workspaces/datasets/dataset_annotated/MUC3/schema_iepile.json \
     --language en \
     --task EE \
     --split_num 4 \

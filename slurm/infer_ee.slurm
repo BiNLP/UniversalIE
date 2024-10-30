@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH -J IEPile_EE                # 作业名为 xxx
-#SBATCH -o ./msg_out/infer_ee_doc.out           # 屏幕上的输出文件重定向到 xxx.out
+#SBATCH -o ./msg_out/infer_ee_muc3.out           # 屏幕上的输出文件重定向到 xxx.out
 #SBATCH -p HGX                   # 作业提交的分区为 HGX
 #SBATCH --qos=lv0b               # 作业使用的 QoS 为 lv0b
 #SBATCH -N 1                      # 作业申请 1 个节点
@@ -17,18 +17,18 @@
 module add cuda11.8/toolkit/11.8.0
 
 
-mkdir /scratch2/nlp/chenzhenbin/Workspaces/IEPile/results/EE/ACE05_Doc/
+mkdir /scratch2/nlp/chenzhenbin/Workspaces/UniversalIE/results/EE/MUC3/
 
 # 输入要执行的命令，例如 ./hello 或 python test.py 等
 CUDA_VISIBLE_DEVICES=0,1 python ../src/inference.py \
     --stage sft \
-    --model_name_or_path '/scratch2/nlp/plm/Llama-2-13b-chat-hf/' \
-    --checkpoint_dir '/scratch2/nlp/chenzhenbin/Workspaces/LLMs/llama2-13b-iepile-lora' \
+    --model_name_or_path '/scratch2/nlp/plm/Meta-Llama-3-8B-Instruct/' \
+    --checkpoint_dir '/scratch2/nlp/chenzhenbin/Workspaces/LLMs/llama3-8b-iepile-lora' \
     --model_name 'llama' \
-    --template 'llama2' \
+    --template 'alpaca' \
     --do_predict \
-    --input_file '/scratch2/nlp/chenzhenbin/Workspaces/IEPile/data/ACE2005/IEPile_format/test_ee_new.json' \
-    --output_file '/scratch2/nlp/chenzhenbin/Workspaces/IEPile/results/EE/ACE05_Doc/IEPile-llama2-13b.json' \
+    --input_file '/home/chenzhenbin/Workspaces/datasets/dataset_annotated/MUC3/test.json' \
+    --output_file '/scratch2/nlp/chenzhenbin/Workspaces/UniversalIE/results/EE/MUC3/IEPile-llama3-8b.json' \
     --finetuning_type lora \
     --output_dir 'lora/test' \
     --predict_with_generate \
