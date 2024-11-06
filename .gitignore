@@ -19,3 +19,5 @@ data/
 lora/
 models/
 results/
+
+msg_out/

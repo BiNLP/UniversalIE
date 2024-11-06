@@ -16,3 +16,7 @@ class TrainingArguments(Seq2SeqTrainingArguments):
     group_by_length: bool = field(default=True, metadata={"help": 'Group sequences into batches with same length. Saves memory and speeds up training considerably.'})
     report_to: str = field(default='none', metadata={"help": "To use wandb or something else for reporting."})
     logging_steps: float = field(default=2, metadata={"help": "Log every X updates steps. Should be an integer or a float in range `[0,1)`. If smaller than 1, will be interpreted as ratio of total training steps."})
+
+    # Save the best model
+    save_total_limit: int = field(default=1, metadata={"help": 'The number of saving checkpoint.'})
+    load_best_model_at_end: bool = field(default=True, metadata={"help": 'Whether to load the best model at the end of Traning'})
