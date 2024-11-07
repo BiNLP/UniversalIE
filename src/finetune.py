@@ -21,9 +21,16 @@ from args.parser import get_train_args
 from model.loader import load_model_and_tokenizer
 from datamodule.get_datasets import load_train_datasets, process_datasets
 
-os.environ["WANDB_DISABLED"] = "true"
+#os.environ["WANDB_DISABLED"] = "true"
 
 logger = get_logger(__name__)
+
+
+# set the wandb project where this run will be logged
+os.environ["WANDB_PROJECT"]="UIE"
+# save your trained model checkpoint to wandb
+os.environ["WANDB_LOG_MODEL"]="true"
+
 
 
 def train(model_args, data_args, training_args, finetuning_args, generating_args):

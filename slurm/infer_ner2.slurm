@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH -J IEPile_NER                # 作业名为 xxx
-#SBATCH -o ./msg_out/Inf_FTDocRED_DocRED_NER.out         # 屏幕上的输出文件重定向到 xxx.out
+#SBATCH -o ./msg_out/Inf_FTDocRED_SciERC_NER.out         # 屏幕上的输出文件重定向到 xxx.out
 #SBATCH -p HGX                   # 作业提交的分区为 HGX
 #SBATCH --qos=lv0b               # 作业使用的 QoS 为 lv0b
 #SBATCH -N 1                      # 作业申请 1 个节点
@@ -16,9 +16,8 @@
 
 module add cuda11.8/toolkit/11.8.0
 
-
-output_dir='/scratch2/nlp/chenzhenbin/Workspaces/UniversalIE/results/NER/DocRED/'
-output_file='/scratch2/nlp/chenzhenbin/Workspaces/UniversalIE/results/NER/DocRED/llama3-8b-DocRED.json'
+output_dir='/scratch2/nlp/chenzhenbin/Workspaces/UniversalIE/results/NER/SciREC/'
+output_file='/scratch2/nlp/chenzhenbin/Workspaces/UniversalIE/results/NER/SciREC/llama3-8b-DocRED.json'
 
 
 mkdir -p ${output_dir}
@@ -31,7 +30,7 @@ CUDA_VISIBLE_DEVICES=0,1 python ../src/inference.py \
     --model_name 'llama' \
     --template 'alpaca' \
     --do_predict \
-    --input_file '/scratch2/nlp/chenzhenbin/Workspaces/datasets/iepile_format_data/NER/DocRED/iepile_test.json' \
+    --input_file '/scratch2/nlp/chenzhenbin/Workspaces/datasets/datasets/iepile_format_data/NER/SciERC/iepile_test.json' \
     --output_file=${output_file} \
     --finetuning_type lora \
     --output_dir 'lora/test' \

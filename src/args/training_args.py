@@ -20,3 +20,4 @@ class TrainingArguments(Seq2SeqTrainingArguments):
     # Save the best model
     save_total_limit: int = field(default=1, metadata={"help": 'The number of saving checkpoint.'})
     load_best_model_at_end: bool = field(default=True, metadata={"help": 'Whether to load the best model at the end of Traning'})
+    report_to: str = field(default='wandb', metadata={"help": 'he list of integrations to report the results and logs to. Supported platforms are "azure_ml", "clearml", "codecarbon", "comet_ml", "dagshub", "dvclive", "flyte", "mlflow", "neptune", "tensorboard", and "wandb". Use "all" to report to all integrations installed, "none" for no integrations.'})

@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -J IEPile_Training                # 作业名为 xxx
 #SBATCH -o ./msg_out/IEPile_FromScratch_WikiEvents.out           # 屏幕上的输出文件重定向到 xxx.out
-#SBATCH -p HGX                   # 作业提交的分区为 HGX
+#SBATCH -p DGX                   # 作业提交的分区为 HGX
 #SBATCH --qos=lv0b               # 作业使用的 QoS 为 lv0b
 #SBATCH -N 1                      # 作业申请 1 个节点
 #SBATCH --ntasks-per-node=1       # 单节点启动的进程数为 1
@@ -47,4 +47,7 @@ CUDA_VISIBLE_DEVICES="0,1" torchrun --nproc_per_node=2 --master_port=1287 ../src
     --lora_r 16 \
     --lora_alpha 32 \
     --lora_dropout 0.05 \
+	--run_name 'WikiEvents_FS'
+	--report_to 'wandb' \
+	--logging_step 2 \
     --bf16
