@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH -J IEPile_Training                # 作业名为 xxx
-#SBATCH -o ./msg_out/IEPile_FromScratch_WikiEvents.out           # 屏幕上的输出文件重定向到 xxx.out
+#SBATCH -o ./msg_out/IEPile_Scratch_DocEE.out           # 屏幕上的输出文件重定向到 xxx.out
 #SBATCH -p DGX                   # 作业提交的分区为 HGX
 #SBATCH --qos=lv0b               # 作业使用的 QoS 为 lv0b
 #SBATCH -N 1                      # 作业申请 1 个节点
@@ -16,7 +16,7 @@
 module add cuda11.8/toolkit/11.8.0 
 
 # 输入要执行的命令，例如 ./hello 或 python test.py 等
-output_dir='/scratch2/nlp/chenzhenbin/Workspaces/UniversalIE/lora/llama3-8b-WikiEvents-FromScratch'
+output_dir='/scratch2/nlp/chenzhenbin/Workspaces/UniversalIE/lora/llama3-8b-DocEE-Scratch'
 mkdir -p ${output_dir}
 CUDA_VISIBLE_DEVICES="0,1" torchrun --nproc_per_node=2 --master_port=1287 ../src/finetune.py \
     --do_train \
@@ -26,8 +26,8 @@ CUDA_VISIBLE_DEVICES="0,1" torchrun --nproc_per_node=2 --master_port=1287 ../src
     --stage 'sft' \
     --model_name 'llama' \
     --template 'alpaca' \
-    --train_file '/scratch2/nlp/chenzhenbin/Workspaces/datasets/iepile_format_data/EE/Wikievents/iepile_train.json' \
-    --valid_file '/scratch2/nlp/chenzhenbin/Workspaces/datasets/iepile_format_data/EE/Wikievents/iepile_dev.json' \
+    --train_file '/scratch2/nlp/chenzhenbin/Workspaces/datasets/iepile_format_data/EE/DocEE-en/iepile_train.json' \
+    --valid_file '/scratch2/nlp/chenzhenbin/Workspaces/datasets/iepile_format_data/EE/DocEE-en/iepile_dev.json' \
     --val_set_size 100 \
     --output_dir=${output_dir} \
     --per_device_train_batch_size 2 \
@@ -47,7 +47,7 @@ CUDA_VISIBLE_DEVICES="0,1" torchrun --nproc_per_node=2 --master_port=1287 ../src
     --lora_r 16 \
     --lora_alpha 32 \
     --lora_dropout 0.05 \
-	--run_name 'WikiEvents_FS'
+	--run_name 'DocEE_Scratch' \
 	--report_to 'wandb' \
 	--logging_step 2 \
     --bf16

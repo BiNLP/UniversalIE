@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH -J IEPile_NER                # 作业名为 xxx
-#SBATCH -o ./msg_out/Inf_FTDocRED_SciERC_NER.out         # 屏幕上的输出文件重定向到 xxx.out
-#SBATCH -p HGX                   # 作业提交的分区为 HGX
+#SBATCH -J IEPile_EE                # 作业名为 xxx
+#SBATCH -o ./msg_out/Inf_FTDocRED_WikiEvents_EE.out	 # 屏幕上的输出文件重定向到 xxx.out
+#SBATCH -p DGX                   # 作业提交的分区为 HGX
 #SBATCH --qos=lv0b               # 作业使用的 QoS 为 lv0b
 #SBATCH -N 1                      # 作业申请 1 个节点
 #SBATCH --ntasks-per-node=1       # 单节点启动的进程数为 1
@@ -16,26 +16,24 @@
 
 module add cuda11.8/toolkit/11.8.0
 
-output_dir='/scratch2/nlp/chenzhenbin/Workspaces/UniversalIE/results/NER/SciREC/'
-output_file='/scratch2/nlp/chenzhenbin/Workspaces/UniversalIE/results/NER/SciREC/llama3-8b-DocRED.json'
-
-
+output_dir='/scratch2/nlp/chenzhenbin/Workspaces/UniversalIE/results/EE/Wikievents/'
 mkdir -p ${output_dir}
 
 # 输入要执行的命令，例如 ./hello 或 python test.py 等
-CUDA_VISIBLE_DEVICES=0,1 python ../src/inference.py \
+CUDA_VISIBLE_DEVICES=0,1 python ../../src/inference.py \
     --stage sft \
     --model_name_or_path '/scratch2/nlp/plm/Meta-Llama-3-8B-Instruct/' \
     --checkpoint_dir '/scratch2/nlp/chenzhenbin/Workspaces/UniversalIE/lora/llama3-8b-DocRED/checkpoint-6488' \
     --model_name 'llama' \
     --template 'alpaca' \
     --do_predict \
-    --input_file '/scratch2/nlp/chenzhenbin/Workspaces/datasets/datasets/iepile_format_data/NER/SciERC/iepile_test.json' \
-    --output_file=${output_file} \
+    --input_file '/scratch2/nlp/chenzhenbin/Workspaces/datasets/iepile_format_data/EE/Wikievents/iepile_test.json' \
+    --output_file '/scratch2/nlp/chenzhenbin/Workspaces/UniversalIE/results/EE/Wikievents/llama3-8b-DocRED.json' \
     --finetuning_type lora \
     --output_dir 'lora/test' \
     --predict_with_generate \
     --cutoff_len 512 \
     --bf16 \
-    --max_new_tokens 300
+    --max_new_tokens 300 \
+	--load_best_model_at_end False
 

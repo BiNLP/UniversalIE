@@ -73,7 +73,7 @@ def evaluate(options):
     for key, value in mapper.items():# 'IEPile_format207...', dict_keys(['output', 'label', 'source', 'input'])
         # 每一个样本
         print("=================================================")
-        print("===========Input:",value['input'])
+        print("***Input***:",value['input'])
         preds = value['output']
         label = value['label']
 
@@ -86,7 +86,7 @@ def evaluate(options):
                 total_counter.count_error()
             converted_preds.extend(out_rst) # 和之前的结果拼接 [('Republican', 'Group'), ('Democratic', 'Group'), ('Bob Jones University', 'Educational')]
         label_kgs = convert_kg(label, options.task) #将标签也转成这种格式
-        print("=========Predictions:",converted_preds)
+        print("***Predictions***:",converted_preds)
 
         if options.sort_by:
             cate_dict[value[options.sort_by]].count_instance(

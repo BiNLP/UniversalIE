@@ -32,7 +32,7 @@ class REMetric(Metric):
 
         self.pred_num += len(pred_list)
         self.gold_num += len(gold_list)
-        print("Gold:",dup_gold_list)
+        print("***Gold***:",dup_gold_list)
 
         for pred in pred_list:
             if pred in dup_gold_list:
@@ -40,4 +40,4 @@ class REMetric(Metric):
                 dup_gold_list.remove(pred)
                 dup_pred_list.remove(pred)
             else:
-                print("Predict incorrect at ->", pred)
+                print("***Predict incorrect at ->", pred)

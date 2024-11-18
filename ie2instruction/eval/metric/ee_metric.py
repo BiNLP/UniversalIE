@@ -37,13 +37,15 @@ class EEMetric(Metric):
 
         self.ee_pred_num += len(pred_list)
         self.ee_gold_num += len(gold_list)
+        print("***Gold Events***:",dup_gold_list)
 
         for pred in pred_list:
             if pred in dup_gold_list:
                 self.ee_tp += 1
                 dup_gold_list.remove(pred)
                 dup_pred_list.remove(pred)
-
+            else:
+                print("***Predict incorrect at ->", pred)
 
     def count_instance_arg(self, gold_list, pred_list):
         gold_list = [tuple(it) for it in gold_list]
@@ -56,13 +58,15 @@ class EEMetric(Metric):
 
         self.ag_pred_num += len(pred_list)
         self.ag_gold_num += len(gold_list)
+        print("***Gold Arguments***:",dup_gold_list)
 
         for pred in pred_list:
             if pred in dup_gold_list:
                 self.ag_tp += 1
                 dup_gold_list.remove(pred)
                 dup_pred_list.remove(pred)
-
+            else:
+                print("***Predict incorrect at ->", pred)
 
     def count_instance_f1(self, gold_list, pred_list):
         self.f1_cnt += 1
