@@ -1,0 +1,32 @@
+output_dir='/home/chenzhb/Workspaces/UniversalIE/lora/llama3-8b-ALL'
+mkdir -p ${output_dir}
+CUDA_VISIBLE_DEVICES="0,1" torchrun --nproc_per_node=2 --master_port=1287 ../src/finetune.py \
+    --do_train \
+	--do_eval \
+    --overwrite_output_dir \
+    --model_name_or_path '/home/chenzhb/Workspaces/LLMs/Meta-Llama-3-8B-Instruct/' \
+    --stage 'sft' \
+    --model_name 'llama' \
+    --template 'alpaca' \
+    --train_file '/home/chenzhb/Workspaces/Datasets/UIE/mixup/allThree_train_mentions_split10.json' \
+    --valid_file '/home/chenzhb/Workspaces/Datasets/UIE/mixup/allThree_dev_mentions_split10.json' \
+    --val_set_size 100 \
+    --output_dir=${output_dir} \
+    --per_device_train_batch_size 2 \
+    --per_device_eval_batch_size 2 \
+    --gradient_accumulation_steps 4 \
+    --preprocessing_num_workers 16 \
+    --num_train_epochs 5 \
+    --learning_rate 1e-6 \
+    --max_grad_norm 0.5 \
+    --optim "adamw_torch" \
+    --max_source_length 400 \
+    --cutoff_len 700 \
+    --max_target_length 300 \
+    --evaluation_strategy "epoch" \
+    --save_strategy "epoch" \
+    --save_total_limit 10 \
+    --lora_r 16 \
+    --lora_alpha 32 \
+    --lora_dropout 0.05 \
+    --bf16
