@@ -18,5 +18,5 @@ python ./src/inference.py \
     --cutoff_len 512 \
     --bf16 \
     --max_new_tokens 300 \
-	  --load_best_model_at_end False \
-	  --enable_outlines True
+	--load_best_model_at_end False \
+	--enable_outlines True

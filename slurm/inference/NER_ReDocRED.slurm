@@ -23,6 +23,7 @@ mkdir -p ${output_dir}
 CUDA_VISIBLE_DEVICES=0,1 python ../../src/inference.py \
     --stage sft \
     --model_name_or_path '/scratch2/nlp/plm/Meta-Llama-3-8B-Instruct/' \
+    --
     --model_name 'llama' \
     --template 'alpaca' \
     --do_predict \

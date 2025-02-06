@@ -66,7 +66,6 @@ def evaluate(options):
         cate_dict = {}
         for cate in cate_set:
             cate_dict[cate] = metric_class(options.match_mode, options.metrics_list)
-    import pdb;pdb.set_trace()
     total_counter = metric_class(options.match_mode, options.metrics_list)
 
 

@@ -122,7 +122,6 @@ def inference(model_args, data_args, training_args, finetuning_args, generating_
             padding_side="left",
             **config_kwargs
         )
-
         model = outlines.models.transformers(
             model_args.model_name_or_path,
             device="cuda",# optional device argument, default is cpu
@@ -195,6 +194,8 @@ def inference(model_args, data_args, training_args, finetuning_args, generating_
         del generator
         return output.model_dump_json(),input_length,len(output.model_dump_json())
 
+
+
     records = []
     with open(inference_args.input_file, "r") as reader:
         for line in reader:
@@ -213,7 +214,6 @@ def inference(model_args, data_args, training_args, finetuning_args, generating_
                 result, input_length, output_length = evaluate_outlines(record, generating_args)
                 input_length_list.append(input_length)
                 output_length_list.append(output_length)
-
                 print(result)
                 record['output'] = result
                 writer.write(json.dumps(record, ensure_ascii=False) + '\n')
@@ -222,10 +222,22 @@ def inference(model_args, data_args, training_args, finetuning_args, generating_
                 result,input_length,output_length  = evaluate(model_inputs, generating_args)
                 input_length_list.append(input_length)
                 output_length_list.append(output_length)
-
                 print(result)
                 record['output'] = result
                 writer.write(json.dumps(record, ensure_ascii=False)+'\n')
+    
+    if inference_args.statistic_len:
+        
+        if inference_args.statistic_file == None:
+            raise NameError("If the statistic_len is True, The statistic_file should be given!")
+
+        with open(inference_args.statistic_file+"/input.json", "w", encoding="utf-8") as f:
+            input_freq = Counter(input_length_list)
+            json.dump(input_freq, f, ensure_ascii=False, indent=4)
+        with open(inference_args.statistic_file+"/output.json", "w", encoding="utf-8") as f:
+            output_freq = Counter(output_length_list)
+            json.dump(output_freq, f, ensure_ascii=False, indent=4)
+        
 
     #需要画图再解除注释
     # timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")

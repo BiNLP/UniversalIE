@@ -1,6 +1,6 @@
-output_dir='/home/chenzhb/Workspaces/UniversalIE/lora/llama3-8b-ALL-drop25'
+output_dir='/home/chenzhb/Workspaces/UniversalIE/lora/llama3-8b-ALL-without-split-2epochs'
 mkdir -p ${output_dir}
-CUDA_VISIBLE_DEVICES="0,1" torchrun --nproc_per_node=2 --master_port=1277 ../../src/finetune.py \
+CUDA_VISIBLE_DEVICES="0,1" torchrun --nproc_per_node=2 --master_port=1377 ../../src/finetune.py \
     --do_train \
 	--do_eval \
     --overwrite_output_dir \
@@ -8,28 +8,30 @@ CUDA_VISIBLE_DEVICES="0,1" torchrun --nproc_per_node=2 --master_port=1277 ../../
     --stage 'sft' \
     --model_name 'llama' \
     --template 'alpaca' \
-    --train_file '/home/chenzhb/Workspaces/Datasets/UIE/ReDocRED_DropEmpty/all/train_0.25.json' \
-    --valid_file '/home/chenzhb/Workspaces/Datasets/UIE/ReDocRED_DropEmpty/all/dev_0.25.json' \
+    --train_file '/home/chenzhb/Workspaces/Datasets/UIE/mixup/train_iepile.json' \
+    --valid_file '/home/chenzhb/Workspaces/Datasets/UIE/mixup/dev_iepile.json' \
     --val_set_size 100 \
     --output_dir=${output_dir} \
     --per_device_train_batch_size 2 \
     --per_device_eval_batch_size 2 \
     --gradient_accumulation_steps 4 \
     --preprocessing_num_workers 16 \
-    --num_train_epochs 10 \
+    --num_train_epochs 2 \
     --learning_rate 5e-5 \
     --max_grad_norm 0.5 \
     --optim "adamw_torch" \
     --max_source_length 400 \
     --cutoff_len 700 \
     --max_target_length 300 \
-    --evaluation_strategy "epoch" \
-    --save_strategy "epoch" \
+    --evaluation_strategy "steps" \
+    --eval_steps 1000 \
+    --save_strategy "steps" \
+    --save_steps 1000 \
     --save_total_limit 1 \
     --lora_r 16 \
     --lora_alpha 32 \
     --lora_dropout 0.05 \
-	--run_name 'ALL_scratch_DropEmpty25' \
+	--run_name 'ALL_scratch_without_split_2epochs' \
 	--report_to 'wandb' \
 	--logging_step 2 \
     --bf16

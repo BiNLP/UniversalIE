@@ -48,5 +48,7 @@ class InferArguments:
     batch_size: int = field(default=16, metadata={"help": "batch size"})
 
     enable_outlines: bool = field(default=False, metadata={"help": "Whether to use outlines"}) #outlines
+    statistic_len: bool = field(default=False, metadata={"help":"Whether to statistic the lengthe of input and output?"})#统计长度
+    statistic_file: str = field(default=None, metadata={"help":"The path to save the statistic result."})#统计数据保存路径
 
 
